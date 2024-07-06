@@ -25,7 +25,7 @@ const Chat = ({ jwtToken, logout }) => {
       }
     }
 
-    const newSocket = new WebSocket('ws://localhost:8080');
+    const newSocket = new WebSocket('wss://ayna-backend.netlify.app');
 
     newSocket.onopen = () => {
       console.log('WebSocket connected');
@@ -58,7 +58,7 @@ const Chat = ({ jwtToken, logout }) => {
 
   const fetchUsername = async (id) => {
     try {
-      const response = await fetch(`http://localhost:1337/api/users/${id}`, {
+      const response = await fetch(`https://ayna-backend.netlify.app/api/users/${id}`, {
         headers: {
           Authorization: `Bearer ${jwtToken}`,
         },
@@ -97,7 +97,7 @@ const Chat = ({ jwtToken, logout }) => {
       setMessage('');
 
       try {
-        const response = await fetch('http://localhost:1337/api/messages', {
+        const response = await fetch('https://ayna-backend.netlify.app/api/messages', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -126,7 +126,7 @@ const Chat = ({ jwtToken, logout }) => {
     const fetchMessages = async () => {
       if (username) {
         try {
-          const response = await fetch(`http://localhost:1337/api/findMessagesByUsername/${username}`, {
+          const response = await fetch(`https://ayna-backend.netlify.app/api/findMessagesByUsername/${username}`, {
             headers: {
               Authorization: `Bearer ${jwtToken}`,
             },

@@ -8,7 +8,7 @@ const Login = ({ setJwtToken }) => {
   const [error, setError] = useState(null);
 
   const handleLogin = () => {
-    fetch('http://localhost:1337/api/auth/local', {
+    fetch('https://ayna-backend.netlify.app/api/auth/local', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
