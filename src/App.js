@@ -3,7 +3,6 @@ import { Route, Routes, Navigate } from 'react-router-dom';
 import Login from './components/Login';
 import Signup from './components/Signup';
 import Chat from './components/Chat';
-import Logout from './components/Logout';
 import './App.css';
 
 function App() {

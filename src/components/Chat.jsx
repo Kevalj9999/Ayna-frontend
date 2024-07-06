@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { addMessage, getMessages } from './idb';
+import React, { useState, useEffect, useCallback } from 'react';
+import { addMessage } from './idb';
 import {jwtDecode} from 'jwt-decode';
 import './Chat.css';
 
@@ -9,6 +9,25 @@ const Chat = ({ jwtToken, logout }) => {
   const [socket, setSocket] = useState(null);
   const [userId, setUserId] = useState(null);
   const [username, setUsername] = useState('');
+
+  const fetchUsername = useCallback(async (id) => {
+    try {
+      const response = await fetch(`https://ayna-backend.netlify.app/api/users/${id}`, {
+        headers: {
+          Authorization: `Bearer ${jwtToken}`,
+        },
+      });
+
+      if (response.ok) {
+        const userData = await response.json();
+        setUsername(userData.username);
+      } else {
+        throw new Error('Failed to fetch username');
+      }
+    } catch (error) {
+      console.error('Error fetching username:', error);
+    }
+  }, [jwtToken]);
 
   useEffect(() => {
     if (jwtToken) {
@@ -54,26 +73,7 @@ const Chat = ({ jwtToken, logout }) => {
     return () => {
       newSocket.close();
     };
-  }, [jwtToken]);
-
-  const fetchUsername = async (id) => {
-    try {
-      const response = await fetch(`https://ayna-backend.netlify.app/api/users/${id}`, {
-        headers: {
-          Authorization: `Bearer ${jwtToken}`,
-        },
-      });
-
-      if (response.ok) {
-        const userData = await response.json();
-        setUsername(userData.username);
-      } else {
-        throw new Error('Failed to fetch username');
-      }
-    } catch (error) {
-      console.error('Error fetching username:', error);
-    }
-  };
+  }, [jwtToken, fetchUsername]);
 
   const handleWebSocketMessage = async (message) => {
     console.log('Received message from server', message);
@@ -131,17 +131,17 @@ const Chat = ({ jwtToken, logout }) => {
               Authorization: `Bearer ${jwtToken}`,
             },
           });
-  
+
           if (response.ok) {
             const { data } = await response.json();
-            console.log("Fetched messages:", data);
-  
+            console.log('Fetched messages:', data);
+
             // Map fetched messages to the required format and duplicate each message
-            const fetchedMessages = data.flatMap(item => [
+            const fetchedMessages = data.flatMap((item) => [
               { text: item.content },
-              { text: item.content }
+              { text: item.content },
             ]);
-  
+
             // Set messages state with fetched messages
             setMessages(fetchedMessages);
           } else {
@@ -152,10 +152,10 @@ const Chat = ({ jwtToken, logout }) => {
         }
       }
     };
-  
+
     fetchMessages();
-  }, [username, jwtToken]);
-  
+  }, [username, jwtToken, fetchUsername]);
+
   return (
     <div className="chat-app">
       <div className="sidebar">
