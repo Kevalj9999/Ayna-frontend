@@ -8,7 +8,7 @@ const Login = ({ setJwtToken }) => {
   const [error, setError] = useState(null);
 
   const handleLogin = () => {
-    fetch('https://ayna-backend.netlify.app/api/auth/local', {
+    fetch('https://precious-flower-79d4f83922.strapiapp.com/api/auth/local', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

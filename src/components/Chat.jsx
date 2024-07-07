@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { addMessage } from './idb';
 import {jwtDecode} from 'jwt-decode';
+import { io } from 'socket.io-client';
 import './Chat.css';
 
 const Chat = ({ jwtToken, logout }) => {
@@ -12,7 +13,7 @@ const Chat = ({ jwtToken, logout }) => {
 
   const fetchUsername = useCallback(async (id) => {
     try {
-      const response = await fetch(`https://ayna-backend.netlify.app/api/users/${id}`, {
+      const response = await fetch(`https://precious-flower-79d4f83922.strapiapp.com/api/users/${id}`, {
         headers: {
           Authorization: `Bearer ${jwtToken}`,
         },
@@ -33,7 +34,6 @@ const Chat = ({ jwtToken, logout }) => {
     if (jwtToken) {
       try {
         const decodedToken = jwtDecode(jwtToken);
-        console.log(jwtToken);
         const { id } = decodedToken;
         setUserId(id);
 
@@ -44,31 +44,30 @@ const Chat = ({ jwtToken, logout }) => {
       }
     }
 
-    const newSocket = new WebSocket('wss://ayna-backend.netlify.app');
-
-    newSocket.onopen = () => {
-      console.log('WebSocket connected');
-      setSocket(newSocket);
-    };
-
-    newSocket.onmessage = async (event) => {
-      if (event.data instanceof Blob) {
-        const text = await event.data.text();
-        try {
-          const receivedMessage = JSON.parse(text);
-          await handleWebSocketMessage(receivedMessage);
-        } catch (error) {
-          console.error('Failed to parse incoming message:', error);
-        }
-      } else {
-        try {
-          const receivedMessage = JSON.parse(event.data);
-          await handleWebSocketMessage(receivedMessage);
-        } catch (error) {
-          console.error('Failed to parse incoming message:', error);
-        }
+    const newSocket = io('https://precious-flower-79d4f83922.strapiapp.com', {
+      withCredentials: true,
+      extraHeaders: {
+        Authorization: `Bearer ${jwtToken}`
       }
-    };
+    });
+
+    newSocket.on('connect', () => {
+      console.log('Socket.IO connected');
+      setSocket(newSocket);
+    });
+
+    newSocket.on('message', async (event) => {
+      try {
+        const receivedMessage = JSON.parse(event);
+        await handleWebSocketMessage(receivedMessage);
+      } catch (error) {
+        console.error('Failed to parse incoming message:', error);
+      }
+    });
+
+    newSocket.on('disconnect', () => {
+      console.log('Socket.IO disconnected');
+    });
 
     return () => {
       newSocket.close();
@@ -93,11 +92,11 @@ const Chat = ({ jwtToken, logout }) => {
       await addMessage(newMessage);
       setMessages((prevMessages) => [...prevMessages, newMessage]);
 
-      socket.send(JSON.stringify(newMessage));
+      socket.emit('message', JSON.stringify(newMessage));
       setMessage('');
 
       try {
-        const response = await fetch('https://ayna-backend.netlify.app/api/messages', {
+        const response = await fetch('https://precious-flower-79d4f83922.strapiapp.com/api/messages', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -126,7 +125,7 @@ const Chat = ({ jwtToken, logout }) => {
     const fetchMessages = async () => {
       if (username) {
         try {
-          const response = await fetch(`https://ayna-backend.netlify.app/api/findMessagesByUsername/${username}`, {
+          const response = await fetch(`https://precious-flower-79d4f83922.strapiapp.com/api/findMessagesByUsername/${username}`, {
             headers: {
               Authorization: `Bearer ${jwtToken}`,
             },

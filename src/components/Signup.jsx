@@ -12,7 +12,7 @@ const Signup = ({ setJwtToken }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('https://ayna-backend.netlify.app/api/auth/local/register', {
+      const response = await fetch('https://precious-flower-79d4f83922.strapiapp.com/api/auth/local/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
